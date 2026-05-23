@@ -1,4 +1,5 @@
 # 🚀 JobFit AI
+<<<<<<< HEAD
 
 AI-powered Resume Optimization & ATS Analysis Platform built using FastAPI, React.js, NLP, and AI APIs.
 
@@ -202,3 +203,6 @@ Designed to help candidates improve recruiter visibility and increase interview 
 📜 License
 
 This project is licensed under the MIT License.
+=======
+### AI-Powered Resume Tailoring & ATS Optimization Platform
+>>>>>>> de0533f7589c7ee70dc755f4409c72ac83cac96b
