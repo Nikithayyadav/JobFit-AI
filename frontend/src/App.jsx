@@ -12,6 +12,10 @@ import {
   Download,
 } from "lucide-react"
 
+// API URL
+
+const API = import.meta.env.VITE_API_URL
+
 function App() {
 
   // States
@@ -44,6 +48,8 @@ function App() {
 
   const handleUpload = async () => {
 
+    // Validate Resume
+
     if (!file) {
 
       alert("Please select a resume")
@@ -51,27 +57,48 @@ function App() {
       return
     }
 
-    if (!jobDescription) {
+    // Validate Job Description
+
+    if (!jobDescription.trim()) {
 
       alert("Please paste a job description")
 
       return
     }
 
-    setLoading(true)
-
-    const formData = new FormData()
-
-    formData.append("file", file)
-
-    formData.append("job_description", jobDescription)
-
     try {
 
-      const response = await axios.post(
-        "http://127.0.0.1:8000/upload-resume/",
-        formData
+      // Start Loading
+
+      setLoading(true)
+
+      // Form Data
+
+      const formData = new FormData()
+
+      formData.append("file", file)
+
+      formData.append(
+        "job_description",
+        jobDescription
       )
+
+      // API Request
+
+      const response = await axios.post(
+
+        `${API}/upload-resume/`,
+
+        formData,
+
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
+
+      // Store Response
 
       setResumeText(response.data.text)
 
@@ -89,6 +116,8 @@ function App() {
 
       setPdfDownload(response.data.pdf_download)
 
+      // Switch Dashboard
+
       setActiveTab("dashboard")
 
     } catch (error) {
@@ -100,7 +129,6 @@ function App() {
     } finally {
 
       setLoading(false)
-
     }
   }
 
@@ -316,321 +344,6 @@ function App() {
           </div>
 
         </div>
-
-        {/* Analytics Cards */}
-
-        {analysis && (
-
-          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 mt-10">
-
-            {/* ATS Score */}
-
-            <div className="bg-cyan-500/10 border border-cyan-400/20 backdrop-blur-xl p-8 rounded-3xl">
-
-              <p className="text-cyan-300 text-sm mb-3">
-                ATS Score
-              </p>
-
-              <h2 className="text-5xl font-bold text-cyan-400">
-                {atsScore}%
-              </h2>
-
-            </div>
-
-            {/* Level */}
-
-            <div className="bg-purple-500/10 border border-purple-400/20 backdrop-blur-xl p-8 rounded-3xl">
-
-              <p className="text-purple-300 text-sm mb-3">
-                Resume Level
-              </p>
-
-              <h2 className="text-3xl font-bold text-purple-300">
-                {analysis.level}
-              </h2>
-
-            </div>
-
-            {/* Category */}
-
-            <div className="bg-pink-500/10 border border-pink-400/20 backdrop-blur-xl p-8 rounded-3xl">
-
-              <p className="text-pink-300 text-sm mb-3">
-                Category
-              </p>
-
-              <h2 className="text-2xl font-bold text-pink-300">
-                {analysis.category}
-              </h2>
-
-            </div>
-
-            {/* Skills */}
-
-            <div className="bg-yellow-500/10 border border-yellow-400/20 backdrop-blur-xl p-8 rounded-3xl">
-
-              <p className="text-yellow-300 text-sm mb-3">
-                Total Skills
-              </p>
-
-              <h2 className="text-5xl font-bold text-yellow-300">
-                {analysis.total_skills}
-              </h2>
-
-            </div>
-
-          </div>
-
-        )}
-
-        {/* Dashboard */}
-
-        {analysis && activeTab === "dashboard" && (
-
-          <div className="grid xl:grid-cols-2 gap-8 mt-10">
-
-            {/* Feedback */}
-
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
-
-              <h2 className="text-3xl font-bold mb-8">
-                AI Feedback
-              </h2>
-
-              <div className="space-y-5">
-
-                {feedback.map((item, index) => (
-
-                  <div
-                    key={index}
-                    className="bg-black/20 border border-white/10 p-5 rounded-2xl"
-                  >
-                    {item}
-                  </div>
-
-                ))}
-
-              </div>
-
-            </div>
-
-            {/* Resume Preview */}
-
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
-
-              <h2 className="text-3xl font-bold mb-8">
-                Resume Preview
-              </h2>
-
-              <div className="bg-black/20 border border-white/10 p-6 rounded-2xl max-h-[500px] overflow-y-auto whitespace-pre-wrap text-gray-300">
-                {resumeText}
-              </div>
-
-            </div>
-
-          </div>
-
-        )}
-
-        {/* Skills */}
-
-        {analysis && activeTab === "skills" && (
-
-          <div className="mt-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
-
-            <h2 className="text-3xl font-bold mb-8">
-              Extracted Skills
-            </h2>
-
-            <div className="flex flex-wrap gap-4">
-
-              {skills.map((skill, index) => (
-
-                <div
-                  key={index}
-                  className="bg-cyan-400/20 border border-cyan-400/30 px-5 py-3 rounded-full font-semibold"
-                >
-                  {skill}
-                </div>
-
-              ))}
-
-            </div>
-
-          </div>
-
-        )}
-
-        {/* Analysis */}
-
-        {analysis && activeTab === "analysis" && (
-
-          <div className="mt-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
-
-            <h2 className="text-3xl font-bold mb-8">
-              AI Recommendations
-            </h2>
-
-            <div className="space-y-5">
-
-              {analysis.recommendations.length > 0 ? (
-
-                analysis.recommendations.map((item, index) => (
-
-                  <div
-                    key={index}
-                    className="bg-black/20 border border-white/10 p-5 rounded-2xl"
-                  >
-                    {item}
-                  </div>
-
-                ))
-
-              ) : (
-
-                <div className="bg-green-500/20 border border-green-400/20 p-5 rounded-2xl">
-                  Your resume looks excellent overall.
-                </div>
-
-              )}
-
-            </div>
-
-          </div>
-
-        )}
-
-        {/* Job Match */}
-
-        {analysis && activeTab === "jobmatch" && jobMatch && (
-
-          <div className="mt-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
-
-            <h2 className="text-3xl font-bold mb-10">
-              Job Match Analysis
-            </h2>
-
-            {/* Match Score */}
-
-            <div className="mb-12">
-
-              <div className="flex justify-between mb-4">
-
-                <p className="text-lg font-semibold">
-                  Match Score
-                </p>
-
-                <p className="text-cyan-400 font-bold text-xl">
-                  {jobMatch.match_score}%
-                </p>
-
-              </div>
-
-              <div className="w-full bg-black/30 rounded-full h-6 overflow-hidden">
-
-                <div
-                  className="bg-gradient-to-r from-cyan-400 to-blue-500 h-6 rounded-full transition-all duration-500"
-                  style={{ width: `${jobMatch.match_score}%` }}
-                />
-
-              </div>
-
-            </div>
-
-            {/* Skills Comparison */}
-
-            <div className="grid lg:grid-cols-2 gap-10">
-
-              {/* Matched Skills */}
-
-              <div>
-
-                <h3 className="text-2xl font-bold mb-5">
-                  Matched Skills
-                </h3>
-
-                <div className="flex flex-wrap gap-4">
-
-                  {jobMatch.matched_skills.map((skill, index) => (
-
-                    <div
-                      key={index}
-                      className="bg-green-500/20 border border-green-400/30 px-5 py-3 rounded-full"
-                    >
-                      {skill}
-                    </div>
-
-                  ))}
-
-                </div>
-
-              </div>
-
-              {/* Missing Skills */}
-
-              <div>
-
-                <h3 className="text-2xl font-bold mb-5">
-                  Missing Skills
-                </h3>
-
-                <div className="flex flex-wrap gap-4">
-
-                  {jobMatch.missing_skills.map((skill, index) => (
-
-                    <div
-                      key={index}
-                      className="bg-red-500/20 border border-red-400/30 px-5 py-3 rounded-full"
-                    >
-                      {skill}
-                    </div>
-
-                  ))}
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        )}
-
-        {/* Optimized Resume */}
-
-        {analysis && activeTab === "optimized" && (
-
-          <div className="mt-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
-
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
-
-              <h2 className="text-3xl font-bold">
-                AI Optimized Resume
-              </h2>
-
-              <a
-                href="http://127.0.0.1:8000/download-resume/"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-3 bg-cyan-400 hover:bg-cyan-300 text-black px-6 py-3 rounded-2xl font-bold transition-all duration-300 shadow-[0_0_30px_rgba(34,211,238,0.3)]"
-              >
-
-                <Download size={20} />
-
-                Download PDF
-
-              </a>
-
-            </div>
-
-            <div className="bg-black/20 border border-white/10 p-6 rounded-2xl whitespace-pre-wrap text-gray-300 max-h-[700px] overflow-y-auto leading-relaxed">
-              {optimizedResume}
-            </div>
-
-          </div>
-
-        )}
 
       </main>
 
