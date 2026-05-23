@@ -7,6 +7,7 @@ import pdfplumber
 import os
 import json
 
+os.makedirs("uploads", exist_ok=True)
 # ReportLab
 
 from reportlab.platypus import (
