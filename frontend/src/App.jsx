@@ -165,6 +165,7 @@ function App() {
                 </div>
               </div>
             )}
+
             {activeTab === "skills" && (
               <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
                 <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Parsed Skill Matrix</h2>
@@ -181,6 +182,7 @@ function App() {
                 </div>
               </div>
             )}
+
             {activeTab === "text" && (
               <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3">
                 <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Extracted Resume Text</h2>
