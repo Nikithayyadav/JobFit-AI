@@ -58,15 +58,19 @@ function App() {
         throw new Error("Empty response received from data processing server.")
       }
 
+      // Print response to console for easy debugging
+      console.log("Raw Server Response Payload:", response.data)
+
       // 1. Basic Response Mapping with Fallbacks
       setResumeText(response.data.text || "")
-      setAtsScore(response.data.ats_score || 0)
       setSkills(Array.isArray(response.data.skills) ? response.data.skills : [])
       setFeedback(Array.isArray(response.data.feedback) ? response.data.feedback : [])
       setPdfDownload(response.data.pdf_download || "")
       
-      // 2. Nested Object Extraction 
-      setAnalysis(response.data.analysis?.category || "AI / Machine Learning") 
+      // 2. FIXED PROPERTY MAPPINGS (Matching your live Network payload precisely)
+      // Extracting data from your server's custom JSON layout structure
+      setAtsScore(response.data.analysis?.ats_score || response.data.ats_score || 0)
+      setAnalysis(response.data.analysis?.level ? `Level: ${response.data.analysis.level}` : "AI / Machine Learning") 
       setJobMatch(response.data.job_match?.match_score || 0) 
 
       // 3. Clean Stringified JSON formatting safely if backend wraps it as raw text string
@@ -84,6 +88,7 @@ function App() {
 
       // Pivot view to Dashboard view panel securely
       setActiveTab("dashboard")
+      alert("Resume analyzed successfully!")
 
     } catch (error) {
       console.error("Upload execution boundary error:", error)
@@ -94,10 +99,10 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-[#0f172a] via-[#111827] to-[#1e1b4b] text-white font-sans antialiased">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-[#0f172a] via-[#111827] to-[#1e1b4b] text-white font-sans antialiased">
       
-      {/* Sidebar Control Deck */}
-      <aside className="w-80 bg-black/40 border-r border-white/5 flex flex-col justify-between p-6 backdrop-blur-xl flex">
+      {/* Desktop Sidebar Control Deck - Stays visible on large viewports */}
+      <aside className="w-80 bg-black/40 border-r border-white/5 flex-col justify-between p-6 backdrop-blur-xl hidden lg:flex">
         <div className="space-y-10">
           <div className="flex items-center gap-3 pl-2">
             <div className="bg-gradient-to-tr from-cyan-500 to-purple-500 p-2.5 rounded-2xl shadow-lg shadow-cyan-500/10">
@@ -143,42 +148,45 @@ function App() {
         </div>
       </aside>
 
+      {/* Mobile Top Header - Visible on phone configurations */}
+      <div className="lg:hidden bg-black/40 border-b border-white/5 p-4 flex items-center justify-between backdrop-blur-xl sticky top-0 z-50">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-cyan-400" />
+          <span className="font-black text-sm tracking-tight">JobFit AI Mobile</span>
+        </div>
+        <span className="text-[10px] bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 px-2 py-1 rounded-md font-mono">v1.0.0</span>
+      </div>
+
       {/* Main Stream Area */}
-      <main className="flex-1 overflow-y-auto p-6 md:p-10 lg:p-14 space-y-12">
+      <main className="flex-1 overflow-y-auto p-4 md:p-10 lg:p-14 space-y-8 pb-24 lg:pb-14">
         
         {/* Welcome Executive Row */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-6">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-white/5 pb-4">
           <div>
-            <h2 className="text-3xl font-extrabold tracking-tight">Processing Dashboard</h2>
-            <p className="text-sm text-gray-400 mt-1">Upload and adjust your parameters to align with industry compliance schemas.</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight">Processing Dashboard</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Upload and adjust your parameters to align with industry compliance schemas.</p>
           </div>
         </header>
 
         {/* Upload Form Container */}
-        <section className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 backdrop-blur-md relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none" />
-
-          <form onSubmit={handleUpload} className="space-y-6 relative z-10">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <section className="bg-white/5 border border-white/10 rounded-2xl p-4 md:p-8 backdrop-blur-md relative overflow-hidden shadow-2xl">
+          <form onSubmit={handleUpload} className="space-y-4 relative z-10">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
               
               {/* File Upload Zone */}
               <div className="flex flex-col">
-                <label className="text-sm font-bold text-gray-300 mb-2 tracking-wide uppercase">Source Document (PDF)</label>
-                <div className="border-2 border-dashed border-white/10 hover:border-cyan-500/40 rounded-2xl bg-black/20 p-6 flex flex-col items-center justify-center min-h-[180px] transition-all duration-300 relative group">
+                <label className="text-xs font-bold text-gray-300 mb-1.5 tracking-wide uppercase">Source Document (PDF)</label>
+                <div className="border-2 border-dashed border-white/10 hover:border-cyan-500/40 rounded-xl bg-black/20 p-4 flex flex-col items-center justify-center min-h-[140px] transition-all duration-300 relative group">
                   <input 
                     type="file" 
                     accept=".pdf" 
                     onChange={handleFileChange} 
                     className="absolute inset-0 opacity-0 cursor-pointer z-20"
                   />
-                  <div className="text-center space-y-3 pointer-events-none flex flex-col items-center">
-                    <div className="bg-white/5 p-4 rounded-xl group-hover:bg-cyan-500/10 group-hover:text-cyan-400 transition-colors duration-300">
-                      <FolderUp className="w-7 h-7 text-gray-400 group-hover:text-cyan-400" />
-                    </div>
+                  <div className="text-center space-y-2 pointer-events-none flex flex-col items-center">
+                    <FolderUp className="w-6 h-6 text-gray-400 group-hover:text-cyan-400" />
                     <div>
-                      <p className="text-sm font-bold tracking-tight">{file ? file.name : "Select your target resume"}</p>
-                      <p className="text-xs text-gray-500 font-medium mt-1">Supports explicit PDF structures up to 10MB</p>
+                      <p className="text-xs font-bold tracking-tight">{file ? file.name : "Select your target resume"}</p>
                     </div>
                   </div>
                 </div>
@@ -186,31 +194,31 @@ function App() {
 
               {/* Job Description Zone */}
               <div className="flex flex-col">
-                <label className="text-sm font-bold text-gray-300 mb-2 tracking-wide uppercase">Target Job Matrix</label>
+                <label className="text-xs font-bold text-gray-300 mb-1.5 tracking-wide uppercase">Target Job Matrix</label>
                 <textarea
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
-                  placeholder="Paste the target technical specifications, role demands, and required compliance frameworks here..."
-                  className="w-full flex-1 bg-black/20 border border-white/10 rounded-2xl p-4 text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-purple-500/40 focus:ring-1 focus:ring-purple-500/20 transition-all duration-300 min-h-[180px] resize-none leading-relaxed"
+                  placeholder="Paste the target description here..."
+                  className="w-full flex-1 bg-black/20 border border-white/10 rounded-xl p-3 text-xs text-gray-300 placeholder-gray-600 focus:outline-none focus:border-purple-500/40 min-h-[120px] resize-none"
                 />
               </div>
             </div>
 
             {/* Submit Action Execution Bar */}
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-end">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-black px-8 py-4 rounded-2xl font-extrabold text-sm tracking-wide shadow-xl shadow-cyan-500/10 hover:shadow-cyan-500/20 transition-all duration-300 flex items-center justify-center gap-2.5 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
+                className="w-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-black py-3 rounded-xl font-extrabold text-xs tracking-wide shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     Evaluating Matrix Metrics...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 text-black font-bold" />
+                    <Sparkles className="w-3 h-3 text-black font-bold" />
                     Analyze Resume Matrix
                   </>
                 )}
@@ -222,31 +230,31 @@ function App() {
         {/* Dynamic Output Content Panels based on Active Tab Selection */}
         <section className="mt-4">
           {activeTab === "dashboard" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[160px] shadow-lg">
-                <h3 className="text-gray-400 text-sm font-bold uppercase tracking-wider">Overall ATS Score</h3>
-                <p className="text-5xl font-black text-cyan-400 mt-3 tracking-tight">{atsScore}%</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center min-h-[120px] shadow-lg">
+                <h3 className="text-gray-400 text-xs font-bold uppercase tracking-wider">Overall ATS Score</h3>
+                <p className="text-4xl font-black text-cyan-400 mt-2">{atsScore}%</p>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[160px] shadow-lg">
-                <h3 className="text-gray-400 text-sm font-bold uppercase tracking-wider">Job Matching Ratio</h3>
-                <p className="text-5xl font-black text-purple-400 mt-3 tracking-tight">{jobMatch}%</p>
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center min-h-[120px] shadow-lg">
+                <h3 className="text-gray-400 text-xs font-bold uppercase tracking-wider">Job Matching Ratio</h3>
+                <p className="text-4xl font-black text-purple-400 mt-2">{jobMatch}%</p>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[160px] shadow-lg">
-                <h3 className="text-gray-400 text-sm font-bold uppercase tracking-wider">Extracted Skills</h3>
-                <p className="text-5xl font-black text-green-400 mt-3 tracking-tight">{skills.length}</p>
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center min-h-[120px] shadow-lg">
+                <h3 className="text-gray-400 text-xs font-bold uppercase tracking-wider">Extracted Skills</h3>
+                <p className="text-4xl font-black text-green-400 mt-2">{skills.length}</p>
               </div>
             </div>
           )}
 
           {activeTab === "skills" && (
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-4 shadow-lg">
-              <h2 className="text-2xl font-bold text-cyan-400 flex items-center gap-2"><Brain className="w-6 h-6" /> Identified Candidate Core Skills</h2>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3 shadow-lg">
+              <h2 className="text-xl font-bold text-cyan-400 flex items-center gap-2"><Brain className="w-5 h-5" /> Core Skills</h2>
               {skills.length === 0 ? (
-                <p className="text-gray-500 font-medium">No telemetry data loaded. Upload a file above to process metrics.</p>
+                <p className="text-xs text-gray-500">No data loaded.</p>
               ) : (
-                <div className="flex flex-wrap gap-3 pt-2">
+                <div className="flex flex-wrap gap-2">
                   {skills.map((skill, index) => (
-                    <span key={index} className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide">
+                    <span key={index} className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase">
                       {skill}
                     </span>
                   ))}
@@ -256,21 +264,21 @@ function App() {
           )}
 
           {activeTab === "analysis" && (
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-6 shadow-lg">
-              <h2 className="text-2xl font-bold text-cyan-400 flex items-center gap-2"><FileText className="w-6 h-6" /> System Structural Assessment</h2>
-              <div className="space-y-4">
-                <div className="bg-black/20 p-5 rounded-2xl border border-white/5">
-                  <h4 className="text-xs text-purple-400 uppercase tracking-wider font-extrabold mb-1">Executive Category Summary</h4>
-                  <p className="text-gray-300 text-sm leading-relaxed">Domain Type classification determined as: <strong className="text-white">{analysis}</strong></p>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4 shadow-lg">
+              <h2 className="text-xl font-bold text-cyan-400 flex items-center gap-2"><FileText className="w-5 h-5" /> Structural Assessment</h2>
+              <div className="space-y-3">
+                <div className="bg-black/20 p-4 rounded-xl border border-white/5">
+                  <h4 className="text-[10px] text-purple-400 uppercase tracking-wider font-extrabold mb-0.5">Category Summary</h4>
+                  <p className="text-gray-300 text-xs font-bold">{analysis}</p>
                 </div>
                 <div>
-                  <h4 className="text-xs text-gray-400 uppercase tracking-wider font-extrabold mb-3">Target Improvement Checkpoints</h4>
+                  <h4 className="text-[10px] text-gray-400 uppercase tracking-wider font-extrabold mb-2">Checkpoints</h4>
                   {feedback.length === 0 ? (
-                    <p className="text-gray-500 font-medium">No checkpoints returned.</p>
+                    <p className="text-xs text-gray-500">No checkpoints returned.</p>
                   ) : (
-                    <ul className="space-y-2.5">
+                    <ul className="space-y-2">
                       {feedback.map((item, index) => (
-                        <li key={index} className="bg-white/5 p-4 rounded-xl text-sm text-gray-300 border-l-4 border-cyan-500 pl-4 leading-relaxed shadow-sm">
+                        <li key={index} className="bg-white/5 p-3 rounded-xl text-xs text-gray-300 border-l-4 border-cyan-500 pl-3">
                           {item}
                         </li>
                       ))}
@@ -282,24 +290,24 @@ function App() {
           )}
 
           {activeTab === "jobmatch" && (
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-4 shadow-lg">
-              <h2 className="text-2xl font-bold text-cyan-400 flex items-center gap-2"><Briefcase className="w-6 h-6" /> Target Role Alignment Vector</h2>
-              <div className="bg-black/20 p-6 rounded-2xl border border-white/5">
-                <p className="text-sm text-gray-300 leading-relaxed">Your resume layout shares a keyword and structural commonality index of <span className="text-purple-400 font-black">{jobMatch}%</span> with the target description schema provided.</p>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-3 shadow-lg">
+              <h2 className="text-xl font-bold text-cyan-400 flex items-center gap-2"><Briefcase className="w-5 h-5" /> Alignment Vector</h2>
+              <div className="bg-black/20 p-4 rounded-xl border border-white/5">
+                <p className="text-xs text-gray-300 leading-relaxed">Your layout matches <span className="text-purple-400 font-black">{jobMatch}%</span> of the target description schema.</p>
               </div>
             </div>
           )}
 
           {activeTab === "optimized" && (
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-6 shadow-lg">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h2 className="text-2xl font-bold text-cyan-400 flex items-center gap-2"><Sparkles className="w-6 h-6" /> AI Engineered Workspace Text</h2>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4 shadow-lg">
+              <div className="flex flex-col gap-2">
+                <h2 className="text-xl font-bold text-cyan-400 flex items-center gap-2"><Sparkles className="w-5 h-5" /> Engineered Text</h2>
                 {pdfDownload && (
                   <a
                     href={`${API}/download-resume/`}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full sm:w-auto text-center bg-green-500 hover:bg-green-400 text-black px-5 py-2.5 rounded-xl text-xs font-black tracking-wide uppercase transition-all duration-200 shadow-md shadow-green-500/10"
+                    className="w-full text-center bg-green-500 text-black py-2 rounded-lg text-[10px] font-black uppercase tracking-wide"
                   >
                     Download Compiled PDF
                   </a>
@@ -307,15 +315,40 @@ function App() {
               </div>
               <textarea
                 readOnly
-                rows="14"
-                value={optimizedResume || "AI payload configuration text will render contextually here."}
-                className="w-full bg-black/40 border border-white/10 rounded-2xl p-5 text-gray-300 font-mono text-xs focus:outline-none resize-none leading-relaxed shadow-inner"
+                rows="10"
+                value={optimizedResume || "AI payload will render here."}
+                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-gray-300 font-mono text-[10px] focus:outline-none resize-none"
               />
             </div>
           )}
         </section>
-
       </main>
+
+      {/* Mobile Sticky Bottom Tab Bar - Handles tabs gracefully on mobile simulation sizes */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-950/80 border-t border-white/10 backdrop-blur-lg flex justify-around p-2 z-50">
+        {[
+          { id: "dashboard", label: "Home", icon: LayoutDashboard },
+          { id: "skills", label: "Skills", icon: Brain },
+          { id: "analysis", label: "Analysis", icon: FileText },
+          { id: "jobmatch", label: "Match", icon: Briefcase },
+          { id: "optimized", label: "Workspace", icon: Sparkles }
+        ].map((tab) => {
+          const IconComponent = tab.icon
+          const isSelected = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              type="button"
+              className={`flex flex-col items-center gap-0.5 p-1.5 rounded-xl transition-all ${isSelected ? "text-cyan-400 font-bold" : "text-gray-500"}`}
+            >
+              <IconComponent className="w-4 h-4" />
+              <span className="text-[9px] tracking-tight">{tab.label}</span>
+            </button>
+          )
+        })}
+      </nav>
+
     </div>
   )
 }
