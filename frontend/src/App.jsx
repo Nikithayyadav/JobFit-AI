@@ -10,7 +10,7 @@ import {
   RefreshCw
 } from "lucide-react"
 
-const API = import.meta.env.VITE_API_URL
+const API =  "https://jobfit-ai-backend-qisq.onrender.com"
 
 function App() {
   const [activeTab, setActiveTab] = useState("dashboard")
