@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 
 // Ensure this matches your live Render backend URL without a trailing slash
-const API = "https://jobfit-ai-backend.onrender.com" 
+const API = "https://jobfit-ai-backend-qisq.onrender.com" 
 
 function App() {
   // Navigation State
