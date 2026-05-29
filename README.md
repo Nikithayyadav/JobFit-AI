@@ -1,4 +1,4 @@
-# 🚀 JobFit AI
+# 🚀 JobFit AI 
 <<<<<<< HEAD
 
 AI-powered Resume Optimization & ATS Analysis Platform built using FastAPI, React.js, NLP, and AI APIs.
