@@ -10,7 +10,7 @@ import {
   Loader2 
 } from "lucide-react"
 
-// Ensure this matches your live Render backend URL without a trailing slash
+// Verified live Render backend API endpoint
 const API = "https://jobfit-ai-backend-qisq.onrender.com" 
 
 function App() {
@@ -54,25 +54,40 @@ function App() {
 
       const response = await axios.post(`${API}/upload-resume/`, formData)
 
-      // Store basic response variables safely with structural fallbacks
+      if (!response.data) {
+        throw new Error("Empty response received from data processing server.")
+      }
+
+      // 1. Basic Response Mapping with Fallbacks
       setResumeText(response.data.text || "")
-      setSkills(response.data.skills || [])
       setAtsScore(response.data.ats_score || 0)
-      setFeedback(response.data.feedback || [])
+      setSkills(Array.isArray(response.data.skills) ? response.data.skills : [])
+      setFeedback(Array.isArray(response.data.feedback) ? response.data.feedback : [])
+      setPdfDownload(response.data.pdf_download || "")
       
-      // FIXED OBJECT MAPPINGS: Safely extract strings and numbers from nested objects
+      // 2. Nested Object Extraction 
       setAnalysis(response.data.analysis?.category || "AI / Machine Learning") 
       setJobMatch(response.data.job_match?.match_score || 0) 
-      setOptimizedResume(response.data.optimized_resume || "")
-      setPdfDownload(response.data.pdf_download || "")
 
-      // Automatically pivot view window to Dashboard tab on success
+      // 3. Clean Stringified JSON formatting safely if backend wraps it as raw text string
+      let rawOptimized = response.data.optimized_resume || ""
+      if (typeof rawOptimized === "string" && (rawOptimized.trim().startsWith("{") || rawOptimized.trim().startsWith("["))) {
+        try {
+          const parsedJSON = JSON.parse(rawOptimized)
+          setOptimizedResume(JSON.stringify(parsedJSON, null, 2))
+        } catch (jsonErr) {
+          setOptimizedResume(rawOptimized)
+        }
+      } else {
+        setOptimizedResume(rawOptimized)
+      }
+
+      // Pivot view to Dashboard view panel securely
       setActiveTab("dashboard")
-      alert("Resume analyzed successfully!")
 
     } catch (error) {
-      console.error("Upload process execution error:", error.response?.data || error.message)
-      alert("Upload or parsing failed. Verify connection status in devtools console.")
+      console.error("Upload execution boundary error:", error)
+      alert(`Analysis failed: ${error.response?.data?.detail || error.message || "Unknown error occurred."}`)
     } finally {
       setLoading(false)
     }
@@ -108,6 +123,7 @@ function App() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
+                  type="button"
                   className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-300 group ${
                     isSelected 
                       ? "bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/20 text-cyan-400 shadow-lg shadow-cyan-500/5" 
@@ -213,7 +229,6 @@ function App() {
               </div>
               <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[160px] shadow-lg">
                 <h3 className="text-gray-400 text-sm font-bold uppercase tracking-wider">Job Matching Ratio</h3>
-                {/* FIXED: Uses the cleanly formatted jobMatch primitive number */}
                 <p className="text-5xl font-black text-purple-400 mt-3 tracking-tight">{jobMatch}%</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[160px] shadow-lg">
@@ -246,7 +261,6 @@ function App() {
               <div className="space-y-4">
                 <div className="bg-black/20 p-5 rounded-2xl border border-white/5">
                   <h4 className="text-xs text-purple-400 uppercase tracking-wider font-extrabold mb-1">Executive Category Summary</h4>
-                  {/* FIXED: Renders the flat category string variable safely */}
                   <p className="text-gray-300 text-sm leading-relaxed">Domain Type classification determined as: <strong className="text-white">{analysis}</strong></p>
                 </div>
                 <div>
