@@ -97,7 +97,7 @@ function App() {
     <div className="min-h-screen flex bg-gradient-to-br from-[#0f172a] via-[#111827] to-[#1e1b4b] text-white font-sans antialiased">
       
       {/* Sidebar Control Deck */}
-      <aside className="w-80 bg-black/40 border-r border-white/5 flex flex-col justify-between p-6 backdrop-blur-xl hidden lg:flex">
+      <aside className="w-80 bg-black/40 border-r border-white/5 flex flex-col justify-between p-6 backdrop-blur-xl flex">
         <div className="space-y-10">
           <div className="flex items-center gap-3 pl-2">
             <div className="bg-gradient-to-tr from-cyan-500 to-purple-500 p-2.5 rounded-2xl shadow-lg shadow-cyan-500/10">
